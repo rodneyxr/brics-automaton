@@ -13,17 +13,25 @@ public class FiniteStateTransducer extends Automaton {
 		FiniteStateTransducer fst = new FiniteStateTransducer();
 		TransducerState s1 = new TransducerState();
 		TransducerState s2 = new TransducerState();
-		s1.addTransition(new TransducerTransition('\u0000', '\uffff', s1));
-		s1.addTransition(new TransducerTransition('/', s2));
-		s2.addTransition(new TransducerTransition('\u0000', '\u002e', s2));
+
+		// s1 -> s1: accept anything
+		s1.addTransition(new TransducerTransition('\u0001', '\uffff', s1));
+
+		// s1 -> s2: '/' => epsilon
+		s1.addTransition(TransducerTransition.createEpsilonTransition('/', '/', s2));
+
+		// s2 -> s2: accept anything minus '/' (split into two transitions)
+		s2.addTransition(new TransducerTransition('\u0001', '\u002e', s2));
 		s2.addTransition(new TransducerTransition('\u0030', '\uffff', s2));
+
 		s2.setAccept(true);
 		fst.setInitialState(s1);
 		return fst;
 	}
 
 	/**
-	 * Returns a sorted array of transitions for each state (and sets state numbers).
+	 * Returns a sorted array of transitions for each state (and sets state
+	 * numbers).
 	 */
 	static TransducerTransition[][] getSortedTransitions(Set<State> states) {
 		setStateNumbers(states);
@@ -81,9 +89,13 @@ public class FiniteStateTransducer extends Automaton {
 						char max = t1[n1].max < t2[n2].max ? t1[n1].max : t2[n2].max;
 						// p.s.transitions.add(new Transition(min, max, r.s));
 						// TODO: implement this
-						// if ('/' >= min && '/' <= max) {
-						p.s.transitions.add(t1[n1].output(min, max, r.s));
-						// }
+						if (!t1[n1].isEpsilon()) {
+							p.s.transitions.add(t1[n1].output(min, max, r.s));
+						} else {
+							 p.s.addEpsilon(r.s);
+							// Transition epsilon = new Transition('\0', r.s);
+							// p.s.transitions.add(epsilon);
+						}
 					}
 			}
 		}
