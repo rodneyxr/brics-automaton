@@ -1,6 +1,7 @@
 package dk.brics.automaton;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -13,18 +14,28 @@ public class FiniteStateTransducer extends Automaton {
 		FiniteStateTransducer fst = new FiniteStateTransducer();
 		TransducerState s1 = new TransducerState();
 		TransducerState s2 = new TransducerState();
+		TransducerState s3 = new TransducerState();
+		TransducerState s4 = new TransducerState();
 
 		// s1 -> s1: accept anything
 		s1.addTransition(new TransducerTransition('\u0001', '\uffff', s1));
 
 		// s1 -> s2: '/' => epsilon
-		s1.addTransition(TransducerTransition.createEpsilonTransition('/', '/', s2));
+		s1.addTransition(new TransducerTransition('/', '/', s2));
 
-		// s2 -> s2: accept anything minus '/' (split into two transitions)
-		s2.addTransition(new TransducerTransition('\u0001', '\u002e', s2));
-		s2.addTransition(new TransducerTransition('\u0030', '\uffff', s2));
+		// s2 -> s3: accept anything minus '/' (split into two transitions)
+		s2.addTransition(TransducerTransition.createEpsilonTransition('\u0001', '\u002e', s3));
+		s2.addTransition(TransducerTransition.createEpsilonTransition('\u0030', '\uffff', s3));
 
-		s2.setAccept(true);
+		// s3 -> s4: accept anything minus '/' (split into two transitions)
+		s3.addTransition(TransducerTransition.createEpsilonTransition('\u0001', '\u002e', s3));
+		s3.addTransition(TransducerTransition.createEpsilonTransition('\u0030', '\uffff', s3));
+
+		// s3 -> s4: '/' => epsilon
+		s3.addTransition(TransducerTransition.createEpsilonTransition('/', '/', s4));
+
+		s3.setAccept(true);
+		s4.setAccept(true);
 		fst.setInitialState(s1);
 		return fst;
 	}
@@ -64,6 +75,7 @@ public class FiniteStateTransducer extends Automaton {
 		Automaton c = new Automaton();
 		LinkedList<StatePair> worklist = new LinkedList<StatePair>();
 		HashMap<StatePair, StatePair> newstates = new HashMap<StatePair, StatePair>();
+		HashMap<StatePair, HashSet<StatePair>> epsilonTranses = new HashMap<StatePair, HashSet<StatePair>>();
 		StatePair p = new StatePair(c.initial, a1.initial, a2.initial);
 		worklist.add(p);
 		newstates.put(p, p);
@@ -81,27 +93,50 @@ public class FiniteStateTransducer extends Automaton {
 						StatePair r = newstates.get(q);
 						if (r == null) {
 							q.s = new State();
+							q.s.accept = q.s1.accept && q.s2.accept;
 							worklist.add(q);
 							newstates.put(q, q);
 							r = q;
 						}
 						char min = t1[n1].min > t2[n2].min ? t1[n1].min : t2[n2].min;
 						char max = t1[n1].max < t2[n2].max ? t1[n1].max : t2[n2].max;
-						// p.s.transitions.add(new Transition(min, max, r.s));
-						// TODO: implement this
+
 						if (!t1[n1].isEpsilon()) {
 							p.s.transitions.add(t1[n1].output(min, max, r.s));
 						} else {
-							 p.s.addEpsilon(r.s);
-							// Transition epsilon = new Transition('\0', r.s);
-							// p.s.transitions.add(epsilon);
+							HashSet<StatePair> dests = epsilonTranses.get(p);
+							if (dests == null) {
+								dests = new HashSet<StatePair>();
+								epsilonTranses.put(p, dests);
+							}
+							dests.add(r);
 						}
 					}
 			}
 		}
+		addEpsilonEdges(epsilonTranses);
 		c.deterministic = a1.deterministic && a2.deterministic;
 		c.removeDeadTransitions();
 		c.checkMinimizeAlways();
 		return c;
+	}
+
+	private void addEpsilonEdges(HashMap<StatePair, HashSet<StatePair>> epsilonTranses) {
+		boolean changed = true;
+		while (changed) {
+			changed = false;
+			for (StatePair src : epsilonTranses.keySet()) {
+				HashSet<StatePair> dests = epsilonTranses.get(src);
+				for (StatePair dest : dests) {
+					int transes = src.s.getTransitions().size();
+					boolean accepted = src.s.accept;
+					src.s.addEpsilon(dest.s);
+					if ((src.s.accept && !accepted) || src.s.transitions.size() > transes) {
+						changed = true;
+					}
+				}
+
+			}
+		}
 	}
 }
