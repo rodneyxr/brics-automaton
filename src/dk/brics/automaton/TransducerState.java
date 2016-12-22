@@ -44,8 +44,8 @@ public class TransducerState extends State {
 		char lmax = (char) (exclude - 1);
 		char rmin = (char) (exclude + 1);
 		char rmax = TransducerTransition.UNICODE_MAX;
-		addTransition(TransducerTransition.createEpsilonTransition(lmin, lmax, to));
-		addTransition(TransducerTransition.createEpsilonTransition(rmin, rmax, to));
+		addTransition(new TransducerTransition(lmin, lmax, to));
+		addTransition(new TransducerTransition(rmin, rmax, to));
 	}
 
 	/**

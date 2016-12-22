@@ -50,7 +50,7 @@ public class FiniteStateTransducer extends Automaton {
 		TransducerState s2 = new TransducerState();
 
 		// s0 -> s0: accept anything minus '/' => identical output
-		s0.addEpsilonExcludeTransition('/', s0);
+		s0.addIdenticalExcludeTransition('/', s0);
 
 		// s0 -> s1: only accept '/' => identical output
 		s0.addTransition(new TransducerTransition('/', s1));
@@ -66,6 +66,7 @@ public class FiniteStateTransducer extends Automaton {
 
 		s0.setAccept(true);
 		s1.setAccept(true);
+		s2.setAccept(true);
 		fst.setInitialState(s0);
 		return fst;
 	}
