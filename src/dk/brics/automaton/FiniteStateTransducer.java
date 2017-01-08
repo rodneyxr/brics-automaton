@@ -85,6 +85,7 @@ public class FiniteStateTransducer extends Automaton {
 
 	@Override
 	public Automaton intersection(Automaton a) {
+		a.expandSingleton(); // some automatons fail without this
 		FiniteStateTransducer a1 = this;
 		Automaton a2 = a;
 		if (a1.isSingleton()) {
