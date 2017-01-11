@@ -8,69 +8,6 @@ import java.util.Set;
 public class FiniteStateTransducer extends Automaton {
 	private static final long serialVersionUID = 1L;
 
-	public static FiniteStateTransducer parentDir() {
-		// Forward Slash - '/' => '\u002f'
-		// Back Slash '\' => '\u005c'
-		FiniteStateTransducer fst = new FiniteStateTransducer();
-		TransducerState s1 = new TransducerState();
-		TransducerState s2 = new TransducerState();
-		TransducerState s3 = new TransducerState();
-		TransducerState s4 = new TransducerState();
-
-		// s1 -> s1: accept anything
-		s1.addIdenticalAcceptAllTransition(s1);
-
-		// s1 -> s2: '/' => epsilon
-		s1.addTransition(new TransducerTransition('/', '/', s2));
-
-		// s2 -> s3: accept anything minus '/' => epsilon
-		s2.addEpsilonExcludeTransition('/', s3);
-
-		// s3 -> s4: accept anything minus '/' => epsilon
-		s3.addEpsilonExcludeTransition('/', s3);
-
-		// s3 -> s4: '/' => epsilon
-		s3.addTransition(TransducerTransition.createEpsilonTransition('/', '/', s4));
-
-		s3.setAccept(true);
-		s4.setAccept(true);
-		fst.setInitialState(s1);
-		return fst;
-	}
-
-	// S0 -> S0: input=All-'/', output=identical
-	// S0 -> S1: input='/', output = identical
-	// S1 -> S2: input='/', output = empty
-	// S1 -> S0: input = All-'/', output = identical
-	// S2 -> S0: input = All-'/', output = identical
-	public static FiniteStateTransducer removeDoubleSeparator() {
-		FiniteStateTransducer fst = new FiniteStateTransducer();
-		TransducerState s0 = new TransducerState();
-		TransducerState s1 = new TransducerState();
-		TransducerState s2 = new TransducerState();
-
-		// s0 -> s0: accept anything minus '/' => identical output
-		s0.addIdenticalExcludeTransition('/', s0);
-
-		// s0 -> s1: only accept '/' => identical output
-		s0.addTransition(new TransducerTransition('/', s1));
-
-		// s1 -> s2: only accept '/' => epsilon
-		s1.addTransition(TransducerTransition.createEpsilonTransition('/', '/', s2));
-
-		// s1 -> s0: accept anything minus '/' => identical output
-		s1.addIdenticalExcludeTransition('/', s0);
-
-		// s2 -> s0: accept anything minus '/' => identical output
-		s2.addIdenticalExcludeTransition('/', s0);
-
-		s0.setAccept(true);
-		s1.setAccept(true);
-		s2.setAccept(true);
-		fst.setInitialState(s0);
-		return fst;
-	}
-
 	/**
 	 * Returns a sorted array of transitions for each state (and sets state
 	 * numbers).
