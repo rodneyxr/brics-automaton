@@ -9,6 +9,35 @@ public class FiniteStateTransducer extends Automaton {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Copies and converts all automaton states and transitions to a new
+	 * FiniteStateTransducer. All output is set to epsilon as there is no way to
+	 * set the output for each state. You will need to traverse each transition
+	 * and set the output yourself.
+	 * 
+	 * @param a
+	 *            The automaton to be converted.
+	 * @return a {@link FiniteStateTransducer} version of <code>a</code>.
+	 */
+	public static FiniteStateTransducer AutomatonToTransducer(Automaton aut) {
+		FiniteStateTransducer fst = new FiniteStateTransducer();
+		if (!aut.isSingleton()) {
+			HashMap<State, TransducerState> m = new HashMap<State, TransducerState>();
+			Set<State> states = aut.getStates();
+			for (State s : states)
+				m.put(s, new TransducerState());
+			for (State s : states) {
+				TransducerState p = m.get(s);
+				p.accept = s.accept;
+				if (s == aut.initial)
+					fst.initial = p;
+				for (Transition t : s.transitions)
+					p.transitions.add(TransducerTransition.createEpsilonTransition(t.min, t.max, m.get(t.to)));
+			}
+		}
+		return fst;
+	}
+
+	/**
 	 * Returns a sorted array of transitions for each state (and sets state
 	 * numbers).
 	 */

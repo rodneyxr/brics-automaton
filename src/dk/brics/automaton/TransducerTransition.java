@@ -18,13 +18,13 @@ public class TransducerTransition extends Transition {
 	char outMax;
 
 	// true if input should also serve as the output
-	boolean hasIdenticalOutput;
+	boolean isIdentical;
 	// tells whether this is an epsilon transition
 	boolean isEpsilon;
 
 	/**
 	 * Constructs a new {@link TransducerTransition} with min and max set to
-	 * {@code c}. {@code hasIdenticalOutput} is set to true since no output is
+	 * {@code c}. {@code isIdentical} is set to true since no output is
 	 * specified.
 	 * 
 	 * @param c
@@ -38,7 +38,7 @@ public class TransducerTransition extends Transition {
 
 	/**
 	 * Constructs a new {@link TransducerTransition} with {@code min} and
-	 * {@code max} set to the parameters provided. {@code hasIdenticalOutput} is
+	 * {@code max} set to the parameters provided. {@code isIdenticalOutput} is
 	 * set to true since no output is specified.
 	 * 
 	 * @param min
@@ -54,7 +54,7 @@ public class TransducerTransition extends Transition {
 
 	/**
 	 * Constructs a new {@link TransducerTransition} with {@code min} and
-	 * {@code max} set to the parameters provided. {@code hasIdenticalOutput} is
+	 * {@code max} set to the parameters provided. {@code isIdentical} is
 	 * set to true since no output is specified.
 	 * 
 	 * @param min
@@ -67,10 +67,10 @@ public class TransducerTransition extends Transition {
 	 *            The max output value.
 	 * @param to
 	 *            The destination state.
-	 * @param hasIdenticalOutput
+	 * @param isIdentical
 	 *            Denotes whether output is the input.
 	 */
-	public TransducerTransition(char min, char max, char outMin, char outMax, State to, boolean hasIdenticalOutput) {
+	public TransducerTransition(char min, char max, char outMin, char outMax, State to, boolean isIdentical) {
 		super(min, max, to);
 		if (outMax < outMin) {
 			char t = outMax;
@@ -79,7 +79,7 @@ public class TransducerTransition extends Transition {
 		}
 		this.outMin = outMin;
 		this.outMax = outMax;
-		this.hasIdenticalOutput = hasIdenticalOutput;
+		this.isIdentical = isIdentical;
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class TransducerTransition extends Transition {
 	/**
 	 * Constructs a new {@link Transition} to the {@link State} {@code to} given
 	 * the input values {@code min} and {@code max}. If
-	 * {@code hasIdenticalOutput} is true, the output values for the new
+	 * {@code isIdentical} is true, the output values for the new
 	 * {@link Transition} will be the input values; else the output values will
 	 * be {@code outMin} and {@code outMax}.
 	 * 
@@ -113,7 +113,7 @@ public class TransducerTransition extends Transition {
 	 * @return the output of this transition given the input values.
 	 */
 	public Transition output(char min, char max, State to) {
-		if (hasIdenticalOutput) {
+		if (isIdentical) {
 			return new Transition(min, max, to);
 		}
 		return new Transition(outMin, outMax, to);
@@ -126,6 +126,41 @@ public class TransducerTransition extends Transition {
 	 */
 	public boolean isEpsilon() {
 		return isEpsilon;
+	}
+
+	/**
+	 * Sets whether this transition's output to be epsilon. If set to true then
+	 * isIdentical will be set to false.
+	 * 
+	 * @param isEpsilon
+	 *            true if output should be epsilon.
+	 */
+	public void setEpsilon(boolean isEpsilon) {
+		this.isEpsilon = isEpsilon;
+		if (isEpsilon)
+			isIdentical = false;
+	}
+
+	/**
+	 * Tells whether this transition has output identical to its input.
+	 * 
+	 * @return true if this transition is an identical output transition.
+	 */
+	public boolean isIdentical() {
+		return isIdentical;
+	}
+
+	/**
+	 * Sets whether this transition's output should be the same as its input. If
+	 * set to true then isEpsilon will be set to false.
+	 * 
+	 * @param isIdentical
+	 *            true if output should be identical to its input.
+	 */
+	public void setIdentical(boolean isIdentical) {
+		this.isIdentical = isIdentical;
+		if (isIdentical)
+			isEpsilon = false;
 	}
 
 	@Override
@@ -141,7 +176,7 @@ public class TransducerTransition extends Transition {
 	@Override
 	public TransducerTransition clone() {
 		TransducerTransition clone = (TransducerTransition) super.clone();
-		clone.hasIdenticalOutput = hasIdenticalOutput;
+		clone.isIdentical = isIdentical;
 		clone.isEpsilon = isEpsilon;
 		clone.outMin = outMin;
 		clone.outMax = outMax;
@@ -159,7 +194,7 @@ public class TransducerTransition extends Transition {
 		b.append(" => ");
 		if (isEpsilon) {
 			b.append("eps");
-		} else if (hasIdenticalOutput) {
+		} else if (isIdentical) {
 			b.append('*');
 		} else {
 			appendCharString(outMin, b);
