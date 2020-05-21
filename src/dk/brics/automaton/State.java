@@ -45,6 +45,8 @@ public class State implements Serializable, Comparable<State> {
 	static final long serialVersionUID = 30001;
 	
 	boolean accept;
+	boolean tainted;
+	
 	Set<Transition> transitions;
 	
 	int number;
@@ -99,6 +101,24 @@ public class State implements Serializable, Comparable<State> {
 	public boolean isAccept() {
 		return accept;
 	}
+
+	/** 
+	 * Sets tainted status for this state.
+	 * @param tainted if true, this state is a tainted state
+	 */
+	public void setTainted(boolean tainted) {
+		this.tainted = tainted;
+	}
+
+
+	/**
+	 * Returns tainted status.
+	 * @return true is this is a tainted state
+	 */
+	public boolean isTainted() {
+		return tainted;
+	}
+
 	
 	/** 
 	 * Performs lookup in transitions, assuming determinism. 

@@ -80,6 +80,7 @@ public class FiniteStateTransducer extends Automaton {
 		while (worklist.size() > 0) {
 			p = worklist.removeFirst();
 			p.s.accept = p.s1.accept && p.s2.accept;
+			p.s.tainted = p.s2.tainted;
 			TransducerTransition[] t1 = transitions1[p.s1.number];
 			Transition[] t2 = transitions2[p.s2.number];
 			for (int n1 = 0, b2 = 0; n1 < t1.length; n1++) {
@@ -92,6 +93,7 @@ public class FiniteStateTransducer extends Automaton {
 						if (r == null) {
 							q.s = new State();
 							q.s.accept = q.s1.accept && q.s2.accept;
+							q.s.tainted = q.s2.tainted;
 							worklist.add(q);
 							newstates.put(q, q);
 							r = q;
