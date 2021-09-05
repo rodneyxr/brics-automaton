@@ -792,7 +792,7 @@ final public class Datatypes {
 		System.out.println("Building Unicode category automata...");
 		Map<String,Set<Integer>> categories = new HashMap<String,Set<Integer>>();
 		try {
-			StreamTokenizer st = new StreamTokenizer(new BufferedReader(new FileReader("src/Unicode.txt")));
+			StreamTokenizer st = new StreamTokenizer(new BufferedReader(new FileReader("Unicode.txt")));
 			st.resetSyntax();
 			st.whitespaceChars(';', ';');
 			st.whitespaceChars('\n', ' ');
